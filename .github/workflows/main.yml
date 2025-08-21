@@ -4,7 +4,6 @@ on:
   push:
     branches: [ "main" ]
 
-# Environment variables available to all jobs and steps
 env:
   GCP_PROJECT_ID: harsha519
   GKE_CLUSTER: autopilot-cluster-1
@@ -18,19 +17,27 @@ jobs:
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # Prevent runaway jobs
+    timeout-minutes: 20
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Decode GCP service account key
+    - name: Write GCP service account key
       run: |
-        echo "🔐 Decoding GCP credentials..."
-        cat <<EOF > gcp-key.json
-        ${{ secrets.GCP_SA_KEY }}
-        EOF
+        echo "🔐 Writing GCP credentials..."
+        cat <<'EOF' > gcp-key.json
+${{ secrets.GCP_SA_KEY }}
+EOF
         echo "✅ Credentials file created."
+
+    - name: Debug GCP Key (Optional)
+      if: ${{ runner.debug }} # Runs only in debug mode
+      run: |
+        echo "📋 Checking key file..."
+        head -n 5 gcp-key.json
+        file gcp-key.json
+        wc -c gcp-key.json
 
     - name: Authenticate with GCP
       run: |
@@ -43,24 +50,22 @@ jobs:
         gcloud storage cp "${{ env.MODEL_BUCKET_URI }}" ./api/model.joblib
         echo "✅ Model downloaded successfully."
 
+    - name: Install gke-gcloud-auth-plugin
+      run: |
+        echo "🔧 Installing gke-gcloud-auth-plugin..."
+        sudo apt-get update
+        sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
+        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+        sudo apt-get update
+        sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin
+        echo "✅ gke-gcloud-auth-plugin installed."
+
     - name: Set up GKE credentials
       run: |
         echo "🔗 Configuring kubectl for GKE cluster..."
         gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} --region ${{ env.GKE_REGION }} --project ${{ env.GCP_PROJECT_ID }}
         echo "✅ GKE credentials configured."
-
-    - name: Install gke-gcloud-auth-plugin
-      run: |
-        echo "🔧 Setting up Google Cloud APT repository..."
-        sudo apt-get update
-        sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
-        curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
-        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-        
-        echo "🔧 Installing gke-gcloud-auth-plugin..."
-        sudo apt-get update
-        sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin
-        echo "✅ gke-gcloud-auth-plugin installed."
 
     - name: Configure Docker for Artifact Registry
       run: |
