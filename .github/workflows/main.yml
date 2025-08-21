@@ -27,8 +27,8 @@ jobs:
       run: |
         echo "🔐 Writing GCP credentials..."
         cat <<'EOF' > gcp-key.json
-${{ secrets.GCP_SA_KEY }}
-EOF
+        ${{ secrets.GCP_SA_KEY }}
+        EOF
         echo "✅ Credentials file created."
 
     - name: Debug GCP Key (Optional)
