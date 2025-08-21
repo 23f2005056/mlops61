@@ -129,3 +129,4 @@ EOF
         echo "🧹 Cleaning up credentials file..."
         rm -f gcp-key.json
         echo "✅ Cleanup completed."
+
