@@ -6,13 +6,13 @@ on:
 
 # Environment variables available to all jobs and steps
 env:
-  GCP_PROJECT_ID: mlopsweek1
-  GKE_CLUSTER: mlopsweek6
+  GCP_PROJECT_ID: harsha519
+  GKE_CLUSTER: autopilot-cluster-1
   GKE_REGION: us-central1
   ARTIFACT_REGISTRY: us-central1-docker.pkg.dev
-  REPO_NAME: iris-repo
+  REPO_NAME: my-repo
   IMAGE_NAME: iris-api
-  MODEL_BUCKET_URI: gs://mlops-course-mlopsweek1-unique/my-models/iris-classifier-week-1/model.joblib
+  MODEL_BUCKET_URI: gs://harsha5192/model.joblib
 
 jobs:
   build-and-deploy:
