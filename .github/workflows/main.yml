@@ -26,8 +26,11 @@ jobs:
     - name: Setup GCP Credentials
       run: |
         echo "🔐 Decoding GCP service account key..."
-        echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > gcp-key.json
+        echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > gcp-key.json
+        ls -lh gcp-key.json
+        cat gcp-key.json | head -n 5
         echo "✅ Credentials file created."
+
 
 
     - name: Debug GCP Key (Optional)
