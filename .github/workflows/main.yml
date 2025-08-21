@@ -23,13 +23,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Write GCP service account key
+    - name: Decode GCP service account key
       run: |
-        echo "🔐 Writing GCP credentials..."
-        cat <<'EOF' > gcp-key.json
-        ${{ secrets.GCP_SA_KEY }}
-        EOF
+        echo "🔐 Decoding GCP credentials..."
+        echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > gcp-key.json
         echo "✅ Credentials file created."
+
 
     - name: Debug GCP Key (Optional)
       if: ${{ runner.debug }} # Runs only in debug mode
